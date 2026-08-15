@@ -1,8 +1,9 @@
 #include <windows.h>
 #include <d3d11.h>
 #include <string>
-#include<iostream>
-#include "generator.h" // Import your generator function
+#include <iostream>
+
+#include "generator.h"
 #include "imgui/imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
@@ -21,7 +22,7 @@ void CleanupRenderTarget();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-int WINAPI main(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int main()
 {
     // 1. Create Window
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Class", nullptr };
@@ -41,10 +42,13 @@ int WINAPI main(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, i
     // 3. Init ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
+
     ImGuiIO& io = ImGui::GetIO();
+    io.IniFilename = nullptr;
     ImFont* lato = io.Fonts->AddFontFromFileTTF("Lato-Black.ttf", 18.0f);
     if (lato == nullptr) {
         io.Fonts->AddFontDefault();
@@ -71,20 +75,26 @@ int WINAPI main(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, i
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
+
+        ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar
+            | ImGuiWindowFlags_NoResize
+            | ImGuiWindowFlags_NoMove
+            | ImGuiWindowFlags_NoCollapse;
 
         // --- DRAW INTERFACE ---
-        ImGui::Begin("Generator Controls", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::PushFont(lato);
-        ImGui::SliderInt("Length", &pass_length, 4, 64);
+        ImGui::Begin("Generator Controls", nullptr, window_flags);
+
+        if (lato) ImGui::PushFont(lato);
+
+        ImGui::SliderInt("Length", &pass_length,4,64);
         ImGui::Checkbox("Include Symbols", &include_symbols);
         ImGui::Checkbox("Include Numbers", &include_numbers);
 
         if (ImGui::Button("Generate Password", ImVec2(-1, 35)))
         {
-            // Calling the function from generator.cpp
-            std::string pass = passwordGenerator(include_symbols,include_numbers,pass_length);
-            std::cout << include_symbols;
-            std::cout << include_numbers;
+            std::string pass = passwordGenerator(include_symbols, include_numbers, pass_length);
             strcpy_s(result_buffer, pass.c_str());
         }
 
@@ -92,11 +102,13 @@ int WINAPI main(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, i
         ImGui::Text("Generated Password:");
         ImGui::InputText("##output", result_buffer, sizeof(result_buffer), ImGuiInputTextFlags_ReadOnly);
 
+        if (lato) ImGui::PopFont();
+
         ImGui::End();
 
         // Render
         ImGui::Render();
-        const float clear_color[4] = { 0.2039f, 0.2863f, 0.3686, 1.00f };
+        const float clear_color[4] = { 0.2039f, 0.2863f, 0.3686f, 1.00f };
         g_pd3dDeviceContext->OMSetRenderTargets(1, &g_mainRenderTargetView, nullptr);
         g_pd3dDeviceContext->ClearRenderTargetView(g_mainRenderTargetView, clear_color);
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
