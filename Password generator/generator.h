@@ -1,2 +1,2 @@
 #pragma once
-std::string passwordGenerator(int symbol,int number,int lenchar);
+std::tuple<std::string,double> passwordGenerator(int symbol,int number,int lenchar);

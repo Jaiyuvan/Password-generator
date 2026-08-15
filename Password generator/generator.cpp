@@ -6,6 +6,7 @@
 #include"generator.h"
 #include"Xoshirocpp.h"
 #include<vector>
+#include<tuple>
 
 
 
@@ -35,7 +36,7 @@ double entropy_calculator(int w, int x, int y, int z,int lenstr) {
 
 
 
-std::string passwordGenerator(int symbol,int number,int lenchar) { 
+std::tuple<std::string,double> passwordGenerator(int symbol,int number,int lenchar) { 
 
     std::string pasw;
     int sc = 0;
@@ -77,5 +78,6 @@ std::string passwordGenerator(int symbol,int number,int lenchar) {
     std::cout << entropy << std::endl;
     std::cout << pasw << std::endl;
 
-    return pasw;
+
+    return { pasw,entropy };
 }

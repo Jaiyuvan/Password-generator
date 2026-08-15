@@ -2,7 +2,7 @@
 #include <d3d11.h>
 #include <string>
 #include <iostream>
-
+#include<tuple>
 #include "generator.h"
 #include "imgui/imgui.h"
 #include "imgui_impl_win32.h"
@@ -64,7 +64,7 @@ int main()
     int pass_length = 16;
     bool include_symbols = true;
     bool include_numbers = true;
-
+    double entropyAns = 0;
     // 4. Main Event Loop
     bool done = false;
     while (!done)
@@ -96,11 +96,14 @@ int main()
         ImGui::SliderInt("Length", &pass_length,4,48);
         ImGui::Checkbox("Include Symbols", &include_symbols);
         ImGui::Checkbox("Include Numbers", &include_numbers);
-
+        
         if (ImGui::Button("Generate Password", ImVec2(-1, 35)))
         {
-            std::string pass = passwordGenerator(include_symbols, include_numbers, pass_length);
-            strcpy_s(result_buffer, pass.c_str());
+            std::tuple returnValue = passwordGenerator(include_symbols, include_numbers, pass_length);
+            auto [passw, entropy] = returnValue;
+            strcpy_s(result_buffer, passw.c_str());
+            ImGui::Text("Entropy: %f", entropy);
+            entropyAns = entropy;
         }
 
         ImGui::Separator();
@@ -109,6 +112,8 @@ int main()
         ImGui::SetNextItemWidth(-1.0f);
         ImGui::InputText("##output", result_buffer, sizeof(result_buffer), ImGuiInputTextFlags_ReadOnly);
         ImGui::PopStyleVar();
+        ImGui::Text("Entropy: %f", entropyAns);
+        
 
         if (lato) ImGui::PopFont();
 
