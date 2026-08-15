@@ -27,7 +27,7 @@ int main()
     // 1. Create Window
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Class", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Password Generator", WS_OVERLAPPEDWINDOW, 100, 100, 450, 350, nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Password Generator", WS_OVERLAPPEDWINDOW, 100, 100, 600, 400, nullptr, nullptr, wc.hInstance, nullptr);
 
     // 2. Init DirectX
     if (!CreateDeviceD3D(hwnd)) {
@@ -38,7 +38,7 @@ int main()
 
     ::ShowWindow(hwnd, SW_SHOWDEFAULT);
     ::UpdateWindow(hwnd);
-
+    ::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     // 3. Init ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -46,6 +46,11 @@ int main()
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
+
+    ImFontConfig config;
+    config.PixelSnapH = true;  
+    config.OversampleH = 3;    
+    config.OversampleV = 1;
 
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = nullptr;
@@ -88,7 +93,7 @@ int main()
 
         if (lato) ImGui::PushFont(lato);
 
-        ImGui::SliderInt("Length", &pass_length,4,64);
+        ImGui::SliderInt("Length", &pass_length,4,48);
         ImGui::Checkbox("Include Symbols", &include_symbols);
         ImGui::Checkbox("Include Numbers", &include_numbers);
 
@@ -100,7 +105,10 @@ int main()
 
         ImGui::Separator();
         ImGui::Text("Generated Password:");
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 8.0f));
+        ImGui::SetNextItemWidth(-1.0f);
         ImGui::InputText("##output", result_buffer, sizeof(result_buffer), ImGuiInputTextFlags_ReadOnly);
+        ImGui::PopStyleVar();
 
         if (lato) ImGui::PopFont();
 
