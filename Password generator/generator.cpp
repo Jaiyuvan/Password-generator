@@ -7,7 +7,7 @@
 #include"Xoshirocpp.h"
 #include<vector>
 #include<tuple>
-
+#include<fstream>
 
 
 std::random_device rd;
@@ -80,4 +80,47 @@ std::tuple<std::string,double> passwordGenerator(int symbol,int number,int lench
 
 
     return { pasw,entropy };
+}
+
+int wordIndex() {
+    std::chrono::high_resolution_clock clock;
+    std::uint64_t seed = { static_cast<unsigned int>(clock.now().time_since_epoch().count()) ^ rd() };
+    XoshiroCpp::Xoshiro128Plus xnum(seed);
+    std::uniform_int_distribution<int> index(0,99);
+    
+    return index(xnum);
+}
+
+std::string passByPhrase(int len) {
+    std::chrono::high_resolution_clock TargetClock;
+    std::uint32_t seed = { static_cast<unsigned int>(TargetClock.now().time_since_epoch().count()) };
+    XoshiroCpp::Xoroshiro128Plus tnum(seed);
+    std::uniform_int_distribution<int> range(1, 7700);
+
+    std::size_t target = range(tnum);
+    std::string passPhrase;
+    std::vector<std::string> words;
+    std::ifstream file;
+    file.open("wordlist-eff-large.txt");
+    if (!file.is_open()) {
+        std::cout << "error while loading the file";
+
+    }
+    std::string line;
+    for (std::size_t i=1;i <= target;i++) {
+        file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+
+    for (std::size_t j = 0;j < 100;j++) {
+        std::getline(file, line);
+        words.push_back(line);
+    }
+
+    for (int k = 0;k < len;k++) {
+        int index = wordIndex();
+        passPhrase =passPhrase+ words[index]+"-";
+    }
+    return passPhrase;
+    
+
 }
