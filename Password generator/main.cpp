@@ -85,7 +85,7 @@ int main() {
 
         if (lato) ImGui::PushFont(lato);
 
-        // --- Password Generator Section ---
+        // Password Generator Section
         ImGui::Text("Password Generator");
         ImGui::SliderInt("Length", &pass_length, 4, 56);
         ImGui::Checkbox("Include Symbols", &include_symbols);
@@ -100,13 +100,16 @@ int main() {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 8.0f));
         ImGui::SetNextItemWidth(-1.0f);
         ImGui::InputText("##pass_output", result_buffer, sizeof(result_buffer), ImGuiInputTextFlags_ReadOnly);
+        if (ImGui::Button("Copy", ImVec2(-1.0f, 35.0f))) {
+            glfwSetClipboardString(window, result_buffer);
+        }
         ImGui::PopStyleVar();
 
         ImGui::Text("Entropy: %.2f bits", entropyAns);
 
         ImGui::Separator();
 
-        // --- Passphrase Generator Section ---
+        
         ImGui::Text("Passphrase Generator");
         ImGui::SliderInt("Word Length", &word_length, 3, 12);
 
@@ -118,6 +121,9 @@ int main() {
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 8.0f));
         ImGui::SetNextItemWidth(-1.0f);
         ImGui::InputText("##phrase_output", result_phrase, sizeof(result_phrase), ImGuiInputTextFlags_ReadOnly);
+        if (ImGui::Button("Copy Pass by Phrase", ImVec2(-1.0f, 35.0f))) {
+            glfwSetClipboardString(window, result_phrase);
+        }
         ImGui::PopStyleVar();
 
         if (lato) ImGui::PopFont();
